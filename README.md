@@ -1,4 +1,4 @@
-Laporan Aktivitas Staf SLiMS 9 
+Staff Activity Report For SLiMS 9 
 ----------------------------
 log sistem ketika user melakukan update biblio, item, dan anggota masuk sebagai hitungan dalam laporan
 ----------------------------
