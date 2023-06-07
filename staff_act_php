@@ -71,7 +71,7 @@ if (!$reportView) {
                             <label><?php echo __('Activity Date Until'); ?></label>
                         </div>
                         <div id="range">
-                            <input type="text" name="startDate" value="2023-01-01">
+                            <input type="text" name="startDate" value="<?php echo date('Y-m-01'); ?>"
                             <span><?= __('to') ?></span>
                             <input type="text" name="untilDate" value="<?= date('Y-m-d') ?>">
                         </div>
@@ -117,7 +117,7 @@ if (!$reportView) {
     $criteria = 'user_id IS NOT NULL ';
     $reportgrid->setSQLCriteria($criteria);
 
-    $start_date = '2000-01-01';
+    $start_date = date('Y-m-01');
     if (isset($_GET['startDate'])) {
         $start_date = $_GET['startDate'];
     }
@@ -127,67 +127,76 @@ if (!$reportView) {
     }
     // callbacks
 
-//  system log for update bibliographic, item, mmember as part of the report | github.com/adeism
-    function showBiblioEntries($obj_db, $array_data)
-    {
-        global $start_date, $until_date;
-        $_count_q = $obj_db->query('SELECT COUNT(log_id) FROM system_log WHERE log_location=\'bibliography\' AND log_type=\'staff\'
-            AND (log_msg LIKE \'%insert bibliographic data%\' OR log_msg LIKE \'%update bibliographic data%\')
-            AND id=\''.$array_data['2'].'\' AND TO_DAYS(log_date) BETWEEN TO_DAYS(\''.$start_date.'\') AND TO_DAYS(\''.$until_date.'\')');
-        $_count_d = $_count_q->fetch_row();
-        return $_count_d[0];
-    }
+// system log for update bibliographic, item, mmember as part of the report &  added bound parameter for prevent from sql injection   | github.com/adeism
+function showBiblioEntries($obj_db, $array_data)
+{
+    global $start_date, $until_date;
+    $sql = 'SELECT COUNT(log_id) FROM system_log WHERE log_location=\'bibliography\' AND log_type=\'staff\' AND (log_msg LIKE \'%insert bibliographic data%\' OR log_msg LIKE \'%update bibliographic data%\') AND id=? AND TO_DAYS(log_date) BETWEEN TO_DAYS(?) AND TO_DAYS(?)';
+    $stmt = $obj_db->prepare($sql);
+    $stmt->bind_param('sss', $array_data['2'], $start_date, $until_date);
+    $stmt->execute();
+    $_count_d = $stmt->get_result()->fetch_row();
+    return $_count_d[0];
+}
 
-    function showItemEntries($obj_db, $array_data)
-    {
-        global $start_date, $until_date;
-        $_count_q = $obj_db->query('SELECT COUNT(log_id) FROM system_log WHERE log_location=\'bibliography\' AND log_type=\'staff\'
-            AND log_msg LIKE \'%insert item data%\' OR log_msg LIKE \'%update item data%\')
-            AND id=\''.$array_data['3'].'\' AND TO_DAYS(log_date) BETWEEN TO_DAYS(\''.$start_date.'\') AND TO_DAYS(\''.$until_date.'\')');
-        $_count_d = $_count_q->fetch_row();
-        return $_count_d[0];
-    }
+function showItemEntries($obj_db, $array_data)
+{
+    global $start_date, $until_date;
+    $sql = 'SELECT COUNT(log_id) FROM system_log WHERE log_location=\'bibliography\' AND log_type=\'staff\' AND (log_msg LIKE \'%insert item data%\' OR log_msg LIKE \'%update item data%\') AND id=? AND TO_DAYS(log_date) BETWEEN TO_DAYS(?) AND TO_DAYS(?)';
+    $stmt = $obj_db->prepare($sql);
+    $stmt->bind_param('sss', $array_data['3'], $start_date, $until_date);
+    $stmt->execute();
+    $_count_d = $stmt->get_result()->fetch_row();
+    return $_count_d[0];
+}
 
-    function showMemberEntries($obj_db, $array_data)
-    {
-        global $start_date, $until_date;
-        $_count_q = $obj_db->query('SELECT COUNT(log_id) FROM system_log WHERE log_location=\'membership\' AND log_type=\'staff\'
-            AND (log_msg LIKE \'%add new member%\' OR log_msg LIKE \'%update member data%\')
-            AND id=\''.$array_data['4'].'\' AND TO_DAYS(log_date) BETWEEN TO_DAYS(\''.$start_date.'\') AND TO_DAYS(\''.$until_date.'\')');
-        $_count_d = $_count_q->fetch_row();
-        return $_count_d[0];
-    }
-// end 
+function showMemberEntries($obj_db, $array_data)
+{
+    global $start_date, $until_date;
+    $sql = 'SELECT COUNT(log_id) FROM system_log WHERE log_location=\'membership\' AND log_type=\'staff\' AND (log_msg LIKE \'%add new member%\' OR log_msg LIKE \'%update member data%\') AND id=? AND TO_DAYS(log_date) BETWEEN TO_DAYS(?) AND TO_DAYS(?)';
+    $stmt = $obj_db->prepare($sql);
+    $stmt->bind_param('sss', $array_data['4'], $start_date, $until_date);
+    $stmt->execute();
+    $_count_d = $stmt->get_result()->fetch_row();
+    return $_count_d[0];
+}
 
-    function showCirculation_Loan($obj_db, $array_data)
-    {
-        global $start_date, $until_date;
-        $_user = $obj_db->escape_string($array_data[0]);
-        $_count_q = $obj_db->query('SELECT COUNT(log_id) FROM system_log WHERE log_location=\'circulation\' AND log_type=\'member\'
-            AND (log_msg LIKE \''.$_user.'%new loan%\') AND TO_DAYS(log_date) BETWEEN TO_DAYS(\''.$start_date.'\') AND TO_DAYS(\''.$until_date.'\')');
-        $_count_d = $_count_q->fetch_row();
-        return $_count_d[0];
-    }
+function showCirculation_Loan($obj_db, $array_data)
+{
+    global $start_date, $until_date;
+    $_user = $obj_db->escape_string($array_data[0]);
+    $sql = 'SELECT COUNT(log_id) FROM system_log WHERE log_location=\'circulation\' AND log_type=\'member\' AND (log_msg LIKE CONCAT(?, \'%new loan%\')) AND TO_DAYS(log_date) BETWEEN TO_DAYS(?) AND TO_DAYS(?)';
+    $stmt = $obj_db->prepare($sql);
+    $stmt->bind_param('sss', $_user, $start_date, $until_date);
+    $stmt->execute();
+    $_count_d = $stmt->get_result()->fetch_row();
+    return $_count_d[0];
+}
 
-    function showCirculation_Return($obj_db, $array_data)
-    {
-        global $start_date, $until_date;
-        $_user = $obj_db->escape_string($array_data[0]);
-        $_count_q = $obj_db->query('SELECT COUNT(log_id) FROM system_log WHERE log_location=\'circulation\' AND log_type=\'member\'
-            AND (log_msg LIKE \''.$_user.'%return item%\' OR \''.$_user.'%Quick Return%\') AND TO_DAYS(log_date) BETWEEN TO_DAYS(\''.$start_date.'\') AND TO_DAYS(\''.$until_date.'\')');
-        $_count_d = $_count_q->fetch_row();
-        return $_count_d[0];
-    }
+function showCirculation_Return($obj_db, $array_data)
+{
+    global $start_date, $until_date;
+    $_user = $obj_db->escape_string($array_data[0]);
+    $sql = 'SELECT COUNT(log_id) FROM system_log WHERE log_location=\'circulation\' AND log_type=\'member\' AND (log_msg LIKE CONCAT(?, \'%return item%\') OR log_msg LIKE CONCAT(?, \'%Quick Return%\')) AND TO_DAYS(log_date) BETWEEN TO_DAYS(?) AND TO_DAYS(?)';
+    $stmt = $obj_db->prepare($sql);
+    $stmt->bind_param('ssss', $_user, $_user, $start_date, $until_date);
+    $stmt->execute();
+    $_count_d = $stmt->get_result()->fetch_row();
+    return $_count_d[0];
+}
 
-    function showCirculation_Extends($obj_db, $array_data)
-    {
-        global $start_date, $until_date;
-        $_user = $obj_db->escape_string($array_data[0]);
-        $_count_q = $obj_db->query('SELECT COUNT(log_id) FROM system_log WHERE log_location=\'circulation\' AND log_type=\'member\'
-            AND (log_msg LIKE \''.$_user.'%extend loan%\') AND TO_DAYS(log_date) BETWEEN TO_DAYS(\''.$start_date.'\') AND TO_DAYS(\''.$until_date.'\')');
-        $_count_d = $_count_q->fetch_row();
-        return $_count_d[0];
-    }
+function showCirculation_Extends($obj_db, $array_data)
+{
+    global $start_date, $until_date;
+    $_user = $obj_db->escape_string($array_data[0]);
+    $sql = 'SELECT COUNT(log_id) FROM system_log WHERE log_location=\'circulation\' AND log_type=\'member\' AND (log_msg LIKE CONCAT(?, \'%extend loan%\')) AND TO_DAYS(log_date) BETWEEN TO_DAYS(?) AND TO_DAYS(?)';
+    $stmt = $obj_db->prepare($sql);
+    $stmt->bind_param('sss', $_user, $start_date, $until_date);
+    $stmt->execute();
+    $_count_d = $stmt->get_result()->fetch_row();
+    return $_count_d[0];
+}
+// end
 
     // columns modification settings
     $reportgrid->column_width = array(0 => '10%', 1 => '10%');
