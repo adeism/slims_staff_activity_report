@@ -1,7 +1,7 @@
-# laporan_aktivitas_staf_slims
-Laporan Aktivitas Staf SLiMS
-system log for update bibliographic, item, mmember as part of the report 
-
+Laporan Aktivitas Staf SLiMS 9 
+----------------------------
+log sistem ketika user melakukan update biblio, item, dan anggota masuk sebagai hitungan dalam laporan
+----------------------------
 
 //  system log for update bibliographic, item, mmember as part of the report | github.com/adeism
 
