@@ -2,7 +2,7 @@
 /**
  *
  * Copyright (C) 2007,2008  Arie Nugraha (dicarve@yahoo.com)
- * Modified  2023 Ade Ismail Siregar | github.com/adeism
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,15 +17,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
+ * 
  */
 
-/* Staff Activity Report */
+/* Staff Activity Report Plus Modified  2023 Ade Ismail Siregar | github.com/adeism */
 
-// key to authenticate
-define('INDEX_AUTH', '1');
 
-// main system configuration
-require '../../../../sysconfig.inc.php';
 // IP based access limitation
 require LIB.'ip_based_access.inc.php';
 do_checkIP('smc');
@@ -80,7 +77,9 @@ if (!$reportView) {
             <input type="button" name="moreFilter" class="btn btn-default" value="<?php echo __('Show More Filter Options'); ?>" />
             <input type="submit" name="applyFilter" class="btn btn-primary" value="<?php echo __('Apply Filter'); ?>" />
             <input type="hidden" name="reportView" value="true" />
-        </form>
+            <input type="hidden" name="id" value="<?= $_GET['id'] ?>"/>
+            <input type="hidden" name="mod" value="<?= $_GET['mod'] ?>"/>
+    </form>
   </div>
   <script>
         $(document).ready(function(){
@@ -219,3 +218,5 @@ function showCirculation_Extends($obj_db, $array_data)
     // include the page template
     require SB.'/admin/'.$sysconf['admin_template']['dir'].'/printed_page_tpl.php';
 }
+/* Content end */
+?>
