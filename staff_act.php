@@ -68,7 +68,7 @@ if (!$reportView) {
                             <label><?php echo __('Activity Date Until'); ?></label>
                         </div>
                         <div id="range">
-                            <input type="text" name="startDate" value="<?php echo date('Y-m-01'); ?>"
+                            <input type="text" name="startDate" value="<?php echo date('Y-m-01'); ?>">
                             <span><?= __('to') ?></span>
                             <input type="text" name="untilDate" value="<?= date('Y-m-d') ?>">
                         </div>
