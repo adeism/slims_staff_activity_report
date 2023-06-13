@@ -12,4 +12,4 @@
 $plugin = \SLiMS\Plugins::getInstance();
 
 // registering our plugin into bibliography module
-$plugin->registerMenu('reporting', __('Staff Activity Report Plus'), __DIR__ . '/staff_act.php');
+$plugin->register('opac', 'show detail', __DIR__ . '/detail.inc.php')
